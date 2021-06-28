@@ -68,7 +68,7 @@ router.post('/checkUserToken', (req, res) => {
   User.findById(_id, (err, doc) => {
     console.log('toke', doc);
     if (!err) {
-      if (token === doc.token && queryTime - doc.tokenCreate <= 60 * 60 * 24 * 3) {
+      if (token === doc.token && queryTime - doc.tokenCreate <= 60 * 60 * 24 * 3 * 1000) {
         const token = invitation(32);
         User.updateOne({ _id }, { token, tokenCreate: new Date().valueOf() }, () => {
           res.send({ status: 0, errMsg: '身份验证通过', token, _id });
