@@ -9,9 +9,11 @@ const db = mongoose.connection;
 
 db.on('open', (err) => {
   if (err) {
+    // eslint-disable-next-line
     console.log('connect failed');
     throw err;
   }
+  // eslint-disable-next-line
   console.log('connect success');
 });
 
@@ -22,7 +24,9 @@ db.on('open', (err) => {
 // }
 
 const User = mongoose.model('user', Collection.User());
+const InviteCode = mongoose.model('inviteCode', Collection.InviteCode());
 
 module.exports = {
   User,
+  InviteCode,
 };

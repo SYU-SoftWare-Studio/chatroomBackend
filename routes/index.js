@@ -4,6 +4,7 @@ const router = express.Router();
 const { QiNiu } = require('../engine');
 const Mongo = require('../utils/Mongo');
 const invitation = require('../utils/Invitation');
+const { Tools } = require('../engine');
 
 const { User } = Mongo;
 
@@ -32,9 +33,6 @@ router.post('/login', (req, res) => {
     } else {
       res.send({ status: 2, errMsg: '账号不存在' });
     }
-    User.find({ account }, (err, doc) => {
-      console.log(doc);
-    });
   });
 });
 
@@ -61,27 +59,19 @@ router.post('/register', (req, res) => {
   });
 });
 
-router.post('/checkUserToken', (req, res) => {
-  console.log(req.body);
+router.post('/checkUserToken', async (req, res) => {
   const { _id, token } = req.body;
-  const queryTime = new Date().valueOf();
-  User.findById(_id, (err, doc) => {
-    console.log('toke', doc);
-    if (!err) {
-      if (token === doc.token && queryTime - doc.tokenCreate <= 60 * 60 * 24 * 3 * 1000) {
-        const token = invitation(32);
-        User.updateOne({ _id }, { token, tokenCreate: new Date().valueOf() }, () => {
-          res.send({ status: 0, errMsg: '身份验证通过', token, _id });
-        });
-      } else {
-        res.send({ status: 1, errMsg: '身份已失效' });
-        const token = invitation(32);
-        User.updateOne({ _id }, { token, tokenCreate: new Date().valueOf() });
-      }
-    } else {
-      res.send({ status: 2, errMsg: '未知错误' });
-    }
-  });
+  const check = await Tools.tokenCheck(_id, token);
+  if (check) {
+    const token = invitation(32);
+    User.updateOne({ _id }, { token, tokenCreate: new Date().valueOf(), isOnline: true }, () => {
+      res.send({ status: 0, errMsg: '身份验证通过', token, _id });
+    });
+  } else {
+    res.send({ status: 1, errMsg: '身份已失效' });
+    const token = invitation(32);
+    User.updateOne({ _id }, { token, tokenCreate: new Date().valueOf(), isOnline: false });
+  }
 });
 
 router.get('/searchUserAndRoom', (req, res) => {

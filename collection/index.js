@@ -26,6 +26,15 @@ class Collection {
     });
   }
 
+  static InviteCode() {
+    return new mongoose.Schema({
+      code: { type: String, default: '' },
+      status: { type: Number, default: 0 }, // 邀请码的状态：0 未被使用，1 已被使用，2 放弃使用
+      createTime: { type: String, default: new Date().valueOf() },
+      user: { type: String, default: '' },
+    });
+  }
+
   static PublicChatRoom() {
     return new mongoose.Schema({
       avatar: { type: String },
